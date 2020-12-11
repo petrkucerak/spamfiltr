@@ -6,12 +6,12 @@ class Mail:
         self.mail_name = file_name
         
         self.header_meta = {}
-        self.body = "" # load mail body as a string
+        self.body = None # load mail body as a string
 
-        self.to = ""
-        self.cc = ""
-        self.subject = ""
-        self.date = ""
+        self.to = None
+        self.cc = None
+        self.subject = None
+        self.date = None
 
     def load(self, filepath):
         # load metadata in email header to direction
@@ -27,15 +27,14 @@ class Mail:
             self.body = file.read()
         
         # delete whitespaces
-        metadata = re.sub("\n( +|\t+|\t+ +)", "; ", metadata)
+        metadata = re.sub('\n( +|\t+|\t+ +)', '; ', metadata)
         # split methadat into direction
-        for i in metadata.strip().split("\n"):
-            i = i.split(": ", 1)
+        for i in metadata.strip().split('\n'):
+            i = i.split(': ', 1)
             if len(i) == 2:
                 self.header_meta[i[0]] = i[1]
         
-        # TODO
-        # problem with:
+        # TODO: problem with loading metadata
         # - Recivied
         # - X-Spam-Status
 
