@@ -47,19 +47,27 @@ class Mail:
 if __name__ == "__main__":
     
     mail_test = Mail()
-    # mail_test.load('spam-data-12-s75-h25/1/1735.767c727c118916606982501980deb249')
+    mail_test.load('spam-data-12-s75-h25/1/1735.767c727c118916606982501980deb249')
     # mail_test.load('spam-data-12-s75-h25/1/01392.6a9e94b131381aa631022fc1b6c9bdab')
-    mail_test.load('spam-data-12-s75-h25/1/00039.889d785885f092c269741b11f2124dce')
+    # mail_test.load('spam-data-12-s75-h25/1/00039.889d785885f092c269741b11f2124dce')
     
+    print("====================")
+    print("MAIL HEADER")
+    print("====================")
     # test print header meta
-    # for k, v in mail_test.header_meta.items():
-    #     print(k + ":", v)
+    for k, v in mail_test.header_meta.items():
+        print(k + ":", v)
     
+    print()
+    print("====================")
+    print("MAIL BODY")
+    print("====================")
+
     # test print mail body
-    # print(mail_test.body)
+    print(mail_test.body)
 
     # test print basic info of mail
-    print("Adresater:", mail_test.to)
-    print("Copy:", mail_test.cc)
-    print("Subject:", mail_test.subject)
-    print("Date:", mail_test.date)
+    # print("Adresater:", mail_test.to)
+    # print("Copy:", mail_test.cc)
+    # print("Subject:", mail_test.subject)
+    # print("Date:", mail_test.date)
