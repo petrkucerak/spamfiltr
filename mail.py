@@ -41,21 +41,20 @@ class Mail:
         self.subject = self.header_meta.get("Subject")
         self.date = self.header_meta.get("Date")
 
-        # convert mail body from string into list of words for better manipulation
-        self.mail_body_string_to_list()
-
         # TODO: problem with loading metadata
         # - Recivied
         # - X-Spam-Status
 
+
     def remove_stop_words(self):
         '''remove stopwords in mail body'''
-        for word in list(self.body):  # iterating on a copy since removing will mess things up
-            if word in stopwords:
+        for word in list(self.body):
+            word_univerzal = word.lower()
+            if word_univerzal in stopwords:
                 self.body.remove(word)
-            
     
     def mail_body_string_to_list(self):
+        '''string -> list of words'''
         self.body = self.body.split()
     
 
@@ -88,5 +87,6 @@ if __name__ == "__main__":
     # print("Date:", mail_test.date)
 
     # test delete stopwords
+    mail_test.mail_body_string_to_list()
     mail_test.remove_stop_words()
     print(mail_test.body)
