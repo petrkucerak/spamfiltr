@@ -49,7 +49,10 @@ class Mail:
 
     def remove_stop_words(self):
         '''remove stopwords in mail body'''
-        pass
+        for word in list(self.body):  # iterating on a copy since removing will mess things up
+            if word in stopwords:
+                self.body.remove(word)
+            
     
     def mail_body_string_to_list(self):
         self.body = self.body.split()
