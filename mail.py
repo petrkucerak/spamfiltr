@@ -7,7 +7,7 @@ class Mail:
         self.mail_name = file_name
         
         self.header_meta = {}
-        self.body = None # load mail body as a list by words
+        self.body = None # load mail body as a list of words
 
         self.to = None
         self.cc = None
@@ -15,7 +15,7 @@ class Mail:
         self.date = None
 
     def load(self, filepath):
-        # load metadata in email header to direction
+        # load metadata in email header to dictionary
         # line by line
         metadata = ""
         with open(filepath, 'r', encoding='utf-8') as file:
@@ -29,16 +29,13 @@ class Mail:
         
         # delete whitespaces
         metadata = re.sub('\n( +|\t+|\t+ +)', '; ', metadata)
-        # split methadat into direction
+
+        # split methadat into dictionary
         for i in metadata.strip().split('\n'):
             i = i.split(': ', 1)
             if len(i) == 2:
                 self.header_meta[i[0]] = i[1]
         
-        # TODO: problem with loading metadata
-        # - Recivied
-        # - X-Spam-Status
-
         self.to = self.header_meta.get("To")
         self.cc = self.header_meta.get("Cc")
         self.subject = self.header_meta.get("Subject")
@@ -46,6 +43,10 @@ class Mail:
 
         # convert mail body from string into list of words for better manipulation
         self.mail_body_string_to_list()
+
+        # TODO: problem with loading metadata
+        # - Recivied
+        # - X-Spam-Status
 
     def remove_stop_words(self):
         '''remove stopwords in mail body'''
