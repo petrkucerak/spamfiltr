@@ -1,4 +1,5 @@
 import re
+from data import stopwords
 
 class Mail:
     
@@ -6,7 +7,7 @@ class Mail:
         self.mail_name = file_name
         
         self.header_meta = {}
-        self.body = None # load mail body as a string
+        self.body = None # load mail body as a list by words
 
         self.to = None
         self.cc = None
@@ -43,6 +44,16 @@ class Mail:
         self.subject = self.header_meta.get("Subject")
         self.date = self.header_meta.get("Date")
 
+        # convert mail body from string into list of words for better manipulation
+        self.mail_body_string_to_list()
+
+    def remove_stop_words(self):
+        '''remove stopwords in mail body'''
+        pass
+    
+    def mail_body_string_to_list(self):
+        self.body = self.body.split()
+    
 
 if __name__ == "__main__":
     
@@ -51,23 +62,27 @@ if __name__ == "__main__":
     # mail_test.load('spam-data-12-s75-h25/1/01392.6a9e94b131381aa631022fc1b6c9bdab')
     # mail_test.load('spam-data-12-s75-h25/1/00039.889d785885f092c269741b11f2124dce')
     
-    print("====================")
-    print("MAIL HEADER")
-    print("====================")
+    # print("====================")
+    # print("MAIL HEADER")
+    # print("====================")
     # test print header meta
-    for k, v in mail_test.header_meta.items():
-        print(k + ":", v)
+    # for k, v in mail_test.header_meta.items():
+    #     print(k + ":", v)
     
-    print()
-    print("====================")
-    print("MAIL BODY")
-    print("====================")
+    # print()
+    # print("====================")
+    # print("MAIL BODY")
+    # print("====================")
 
     # test print mail body
-    print(mail_test.body)
+    # print(mail_test.body)
 
     # test print basic info of mail
     # print("Adresater:", mail_test.to)
     # print("Copy:", mail_test.cc)
     # print("Subject:", mail_test.subject)
     # print("Date:", mail_test.date)
+
+    # test delete stopwords
+    mail_test.remove_stop_words()
+    print(mail_test.body)
