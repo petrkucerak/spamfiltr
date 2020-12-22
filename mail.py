@@ -1,4 +1,5 @@
 import re
+from data import stopwords
 
 
 class Mail:
@@ -8,6 +9,7 @@ class Mail:
         self.mail_name = file_name
 
         self.header_meta = {}
+
         self.body = None  # load mail body as a string
 
         self.to = None
@@ -44,9 +46,15 @@ class Mail:
 
     def __str__(self):
         return self.stringify()
+        self.body = None  # load mail body as a list of words
+
+        self.to = None
+        self.cc = None
+        self.subject = None
+        self.date = None
 
     def load(self, filepath):
-        # load metadata in email header to direction
+        # load metadata in email header to dictionary
         # line by line
         metadata = ''
         with open(filepath, 'r', encoding='utf-8') as file:
@@ -76,11 +84,27 @@ class Mail:
         self.subject = self.header_meta.get("Subject")
         self.date = self.header_meta.get("Date")
 
+        # TODO: problem with loading metadata
+        # - Recivied
+        # - X-Spam-Status
+
+    def remove_stop_words(self):
+        '''remove stopwords in mail body'''
+        for word in list(self.body):
+            word_univerzal = word.lower()
+            if word_univerzal in stopwords:
+                self.body.remove(word)
+
+    def mail_body_string_to_list(self):
+        '''string -> list of words'''
+        self.body = self.body.split()
+
 
 if __name__ == "__main__":
 
     mail_test = Mail()
-    # mail_test.load('spam-data-12-s75-h25/1/1735.767c727c118916606982501980deb249')
+    mail_test.load(
+        'spam-data-12-s75-h25/1/1735.767c727c118916606982501980deb249')
     # mail_test.load('spam-data-12-s75-h25/1/01392.6a9e94b131381aa631022fc1b6c9bdab')
     mail_test.load(
         'spam-data-12-s75-h25/1/01359.deafa1d42658c6624c6809a446b7f369')
