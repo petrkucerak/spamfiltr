@@ -37,6 +37,7 @@ def strip_tags(html):
 class WordNormalizer:
 
     def load_stopwords(self):
+        '''load premade list of stopwords form a file'''
         try:
             with open('stop_words.txt', 'r') as f:
                 self.stopwords = f.read().splitlines()
@@ -45,7 +46,8 @@ class WordNormalizer:
         except:
             self.stopwords_loaded = False
 
-    def load_patterns(self):
+    def compile_patterns(self):
+        '''precompiles regex patterns'''
         self.patterns = []
 
         mail_pat = re.compile(
@@ -77,17 +79,12 @@ class WordNormalizer:
     def __init__(self):
 
         self.load_stopwords()
-        self.load_patterns()
+        self.compile_patterns()
 
         self.html_tag_regex = re.compile('<.*?>')
 
-    def remove_html_tags(self, input_text):
-        cleantext = re.sub(self.html_tag_regex, '', input_text)
-        print("in: ", input_text)
-        print("\n\n\n\nout: ", cleantext)
-        return cleantext
-
     def normalize_words(self, words):
+        '''replaces coplex structures such as mail adresses and urls with simplified strings'''
         new_words = []
         found = False
         for word in words:
@@ -102,7 +99,9 @@ class WordNormalizer:
         return new_words
 
     def normalize(self, text):
+        '''takes a string and returns a list of normalized words'''
         text = text.lower()
+        # need text instead of just a list of words for this
         clean_text = strip_tags(text)
 
         # TODO: decide if we want to keep this since it more than doubles the time of this mehtond
