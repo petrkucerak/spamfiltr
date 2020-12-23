@@ -74,11 +74,6 @@ class Mail:
             if len(i) == 2:
                 self.header_meta[i[0]] = i[1]
 
-        # TODO
-        # problem with:
-        # - Recivied
-        # - X-Spam-Status
-
         self.to = self.header_meta.get("To")
         self.cc = self.header_meta.get("Cc")
         self.subject = self.header_meta.get("Subject")
