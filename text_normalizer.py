@@ -2,6 +2,7 @@ import re
 from utils import read_classification_from_file
 from io import StringIO
 from html.parser import HTMLParser
+import string
 
 # I've used the porter_stemmer method from the nltk library
 #   (I've only copied the necessary files to run this method and am not using anything else from nltk)
@@ -50,31 +51,48 @@ class WordNormalizer:
         '''precompiles regex patterns'''
         self.patterns = []
 
+        # replaces a email adresses with 'standardEmailAddress'
         mail_pat = re.compile(
             r"([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)")
         self.patterns.append((mail_pat, 'standardEmailAddress'))
 
+        # replaces soemthing that is purely numerical (may be negative or decimal)
+        just_num_pat = re.compile(r'^-?\d+(\.|,\d+)?$')
+        self.patterns.append((just_num_pat, 'standardPureNumber'))
+
         phone_pat = re.compile(
             r"[\dA-Z]{3}-[\dA-Z]{3}-[\dA-Z]{4}", re.IGNORECASE)
         self.patterns.append((phone_pat, 'standardPhoneNumber'))
-
+        # TODO: figure out where I got this (had this saved in my regex cheat sheet for years)
         url_pat = re.compile(
             r'(?:http|ftp)s?://'  # http:// or https://
             # domain...
             r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'
             r'localhost|'  # localhost...
-            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})|'  # or ip
+            r'(www\.[a-zA-Z0-9]+\.)'    # or 'www.something.
             r'(?::\d+)?'  # optional port
             r'(?:/?|[/?]\S+)', re.IGNORECASE)
         self.patterns.append((url_pat, 'standardUrlString'))
 
         ip_pat = re.compile(
-            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+            r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
         self.patterns.append((ip_pat, 'standardIpAddress'))
-        # TODO: price pattern
+
+        price_pat = re.compile(r'^\$\d+(\.|,\d+)?$')
+        self.patterns.append((price_pat, 'standardPriceString'))
+
+        # decided not to use this since it had too many false positives
+        # I just concider any 4-digit number a year
+        #year_pat = re.compile(r'^\d{4}$')
+        #self.patterns.append((year_pat, 'standardYearString'))
+
         # TODO: time pattern
         # TODO: date pattern
         #print('loaded patterns: ', self.patterns)
+
+        repeting_sequence_pat = re.compile(r'^(.+)\1{4,}$')
+        self.patterns.append((repeting_sequence_pat, 'standardRepeatingChars'))
 
     def __init__(self):
 
@@ -82,6 +100,7 @@ class WordNormalizer:
         self.compile_patterns()
 
         self.html_tag_regex = re.compile('<.*?>')
+        self.trailing_char_regex = re.compile('(\.|,|\?|:|!|\$|\')$')
 
     def normalize_words(self, words):
         '''replaces coplex structures such as mail adresses and urls with simplified strings'''
@@ -103,12 +122,15 @@ class WordNormalizer:
         text = text.lower()
         # need text instead of just a list of words for this
         clean_text = strip_tags(text)
-
-        # TODO: decide if we want to keep this since it more than doubles the time of this mehtond
-        words = stem_list_of_words.stem_words(clean_text.split())
-
+        words = clean_text.split()
+        words = [x for x in words if len(x) > 2]
+        words = [x if x[-1].isalpha() else x[:-1] for x in words]
         if self.stopwords_loaded:
             words = [x for x in words if x not in self.stopwords]
+
+        # TODO: decide if we want to keep this since it  doubles the time of this method
+        words = stem_list_of_words.stem_words(words)
+
         words = self.normalize_words(words)
 
         return words
@@ -116,38 +138,40 @@ class WordNormalizer:
 
 if __name__ == "__main__":
     wn = WordNormalizer()
-    str_w_html = """<html>
-    <body>
-    <center>
-    <b><font color = "red" size = "+2.5">COST EFFECTIVE Direct Email Advertising</font><br>
-    <font color = "blue" size = "+2">Promote Your Business For As Low As </font><br>
-    <font color = "red" size = "+2">$50</font> <font color = "blue" size = "+2">Per 
-    <font color = "red" size = "+2">1 Million</font>
-    <font color = "blue" size = "+2"> Email Addresses</font></font><p>
-    <b><font color = "#44C300" size ="+2">MAXIMIZE YOUR MARKETING DOLLARS!<p></FONT></b>
-    <font size = "+2">Complete and fax this information form to 309-407-7378.<Br>
-    A Consultant will contact you to discuss your marketing needs.<br>
-    </font></font>
-    <Table><tr><td>
-    <font size = "+1"><b>NAME:___________________________________________________________________<br>
-    <font size = "+1"><b>COMPANY:_______________________________________________________________<br>
-    <font size = "+1"><b>ADDRESS:________________________________________________________________<br>
-    <font size = "+1"><b>CITY:_____________________________________________________________________<br>
-    <font size = "+1"><b>STATE:___________________________________________________________________<br>
-    <font size = "+1"><b>PHONE:___________________________________________________________________<br>
-    <font size = "+1"><b>E-MAIL:__________________________________________________________________<br>
-    <font size = "+1"><b>WEBSITE: <font size = "-1" color = "red">(Not Required)</font>_______________________________________________________<br>
-    ___________________________________________________________________________<br>
-    ___________________________________________________________________________<br>
-    <b><font color = "red">*</font>COMMENTS: <font color = "Red" size = "-1">(Provide details, pricing, etc. on the products and services you wish to market)</font><br>
-    ___________________________________________________________________________<br>
-    ___________________________________________________________________________<br>
-    ___________________________________________________________________________<br>
-    ___________________________________________________________________________<br>
-    </td></tr>
-    </table>
-    </center>
-    </body>
-    </html>
-    """
-    print(wn.remove_html_tags(str_w_html))
+    just_num_pat = re.compile(r'^-?\d+(\.|,\d+)?$')
+    words = ["100", "10", "20", "50"]
+    print(words)
+
+    words = [w for w in words if just_num_pat.match(w)]
+    print(words)
+
+    # TODO: need to figure out how these passing
+    #        ["$19.9", 16],
+    #        ["$1,000,00", 15],
+
+    #        ["=3c=2fdiv=3", 15],
+    #        ["=09=0", 43],
+
+    #        ["--deathtospamdeathtospamdeathtospam-", 31],
+
+    #        ["it'", 61], (the ' at the end)
+    #        ["company'", 13],
+
+    #        ["(and", 15],
+
+    #        ["..", 14],
+    #        ["==", 47],
+
+    #        ["[1", 12],
+
+    #        ["-----origin", 10],
+    #        ["message----", 10],
+
+    #        ["=2", 120],
+
+    #        ["{margin-right:0cm", 80],
+    #        ["text-decoration:underline;", 49],
+    #        ["font-size:9.0pt", 25],
+    #
+
+    #        ["charset=\"iso-8859-1", 65],
