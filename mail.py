@@ -1,5 +1,5 @@
 import re
-from data import stopwords
+#from data import stopwords
 
 
 class Mail:
@@ -83,12 +83,12 @@ class Mail:
         # - Recivied
         # - X-Spam-Status
 
-    def remove_stop_words(self):
-        '''remove stopwords in mail body'''
-        for word in list(self.body):
-            word_univerzal = word.lower()
-            if word_univerzal in stopwords:
-                self.body.remove(word)
+    # def remove_stop_words(self):
+    #    '''remove stopwords in mail body'''
+    #    for word in list(self.body):
+    #        word_univerzal = word.lower()
+    #        if word_univerzal in stopwords:
+    #            self.body.remove(word)
 
     def mail_body_string_to_list(self):
         '''string -> list of words'''
