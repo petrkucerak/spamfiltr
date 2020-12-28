@@ -88,6 +88,8 @@ class Mail:
         # - Recivied
         # - X-Spam-Status
 
+        #  TODO: is a reply?
+
     # def remove_stop_words(self):
     #    '''remove stopwords in mail body'''
     #    for word in list(self.body):
