@@ -5,8 +5,8 @@ from html.parser import HTMLParser
 import string
 from collections import Counter
 import time
-from premade_data_loader import PremadeData
-from macros import CustMacros
+from premade_data_loader import LoadData
+from macros import CustomMacros
 
 # I've used the porter_stemmer method from the nltk library
 #   (I've only copied the necessary files to run this method and am not using anything else from nltk)
@@ -45,59 +45,56 @@ class TextNormalizer:
         '''precompiles regex patterns'''
         self.patterns = []
 
-        # replaces a email adresses with 'standardEmailAddress'
+        # replaces a email addresses with 'standardEmailAddress'
         mail_pat = re.compile(
             r"([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)")
-        self.patterns.append((mail_pat, CustMacros.standard_email_address))
+        self.patterns.append((mail_pat, CustomMacros.standard_email_address))
 
-        # replaces soemthing that is purely numerical (may be negative or decimal)
+        # replaces something that is purely numerical (may be negative or decimal)
         just_num_pat = re.compile(r'^-?\d+(\.|,\d+)?$')
-        self.patterns.append((just_num_pat, CustMacros.standard_pure_number))
+        self.patterns.append((just_num_pat, CustomMacros.standard_pure_number))
 
         phone_pat = re.compile(
             r"[\dA-Z]{3}-[\dA-Z]{3}-[\dA-Z]{4}", re.IGNORECASE)
-        self.patterns.append((phone_pat, CustMacros.standard_phone_number))
+        self.patterns.append((phone_pat, CustomMacros.standard_phone_number))
         # TODO: figure out where I got this (had this saved in my regex cheat sheet for years)
         url_pat = re.compile(
-            r'(?:http|ftp)s?://'  # http:// or https://
+            r'(?:http)s?://'  # http:// or https://
             # domain...
             r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'
-            r'localhost|'  # localhost...
             r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})|'  # or ip
             r'(www\.[a-zA-Z0-9]+\.)'    # or 'www.something.
             r'(?::\d+)?'  # optional port
             r'(?:/?|[/?]\S+)', re.IGNORECASE)
-        self.patterns.append((url_pat, CustMacros.standard_url))
+        self.patterns.append((url_pat, CustomMacros.standard_url))
 
         ip_pat = re.compile(
             r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
-        self.patterns.append((ip_pat, CustMacros.standard_ip_address))
+        self.patterns.append((ip_pat, CustomMacros.standard_ip_address))
 
         price_pat = re.compile(r'^\$\d+(\.|,\d+)?$')
-        self.patterns.append((price_pat, CustMacros.standard_price_string))
+        self.patterns.append((price_pat, CustomMacros.standard_price_string))
 
         # TODO: time pattern
         # TODO: date pattern
-        #print('loaded patterns: ', self.patterns)
 
-        repeting_sequence_pat = re.compile(r'^(.+)\1{6,}$')
+        repeating_sequence_pat = re.compile(r'^(.+)\1{6,}$')
         self.patterns.append(
-            (repeting_sequence_pat, CustMacros.notable_repeating_sequence))
+            (repeating_sequence_pat, CustomMacros.notable_repeating_sequence))
 
     def __init__(self):
 
         self._compile_patterns()
 
         self.leading_char_regex = re.compile(r'^\(')
-        # FIXME: No idea why this regex doesnt work
-        self.unwanted_char_regex = re.compile(r'=|\\|\"')
-        self.repeting_sequence_pat = re.compile(r'^(.+)\1{2,}$')
 
-        self.pm = PremadeData('data.json')
+        self.repeating_sequence_pat = re.compile(r'^(.+)\1{2,}$')
+
+        self.pm = LoadData()
+        self.pm.load_premade('json_premade.json')
 
     def _normalize_words(self, words):
-        '''replaces coplex structures such as mail adresses and urls with simplified strings'''
-        # TODO: make it so this returns two list of words, so the nomralized strings don't have to go though stemming
+        '''replaces coplex structures such as mail addresses and urls with simplified strings'''
         new_words = []
         pattern_counter = Counter({})
 
@@ -117,12 +114,6 @@ class TextNormalizer:
         word_counter = Counter(new_words)
         return (word_counter, pattern_counter)
 
-    def _remove_unwanted(self, counter):
-        list = dict(counter).items()
-        list = [(x, y) for x, y in list
-                if not self.unwanted_char_regex.match(x)]
-        return Counter(dict(list))
-
     def normalize(self, text):
         '''takes a string and returns a list of normalized words'''
         text = text.lower()
@@ -130,55 +121,18 @@ class TextNormalizer:
         clean_text = strip_tags(text)
         words = clean_text.split()
 
-        # ignores words shorter than 3 characters
-        words = [x for x in words if len(x) > 2]
+        # ignores words shorter than 3 and longer than 15 characters
+        words = [x for x in words if len(x) > 2 and len(x) < 16]
 
-        # removes trailing special characters from words
-        words = [x if x[-1].isalnum() else x[:-1] for x in words]
-
-        # removes unwanted first characters from words
-        words = [x[1:] if self.leading_char_regex.match(
-            x) else x for x in words]
+        words = [x for x in words if x.isalnum()]
 
         # removes stopwords (words that won't help us with evaluating if the mail is spam
         #   like pronouns, sentence connectors and such)
         words = [x for x in words if x not in self.pm.stopwords]
 
         counters = self._normalize_words(words)
-        word_counter = self._remove_unwanted(counters[0])
+        word_counter = counters[0]
         final_counter = counters[1]
         final_counter += stem_list_of_words.stem_words(word_counter)
 
         return final_counter
-
-
-# TODO: need to figure out how these are passing
-#        ["$19.9", 16],
-#        ["$1,000,00", 15],
-
-#        ["=3c=2fdiv=3", 15],
-#        ["=09=0", 43],
-
-#        ["--deathtospamdeathtospamdeathtospam-", 31],
-
-#        ["it'", 61], (the ' at the end)
-#        ["company'", 13],
-
-#        ["(and", 15],
-
-#        ["..", 14],
-#        ["==", 47],
-
-#        ["[1", 12],
-
-#        ["-----origin", 10],
-#        ["message----", 10],
-
-#        ["=2", 120],
-
-#        ["{margin-right:0cm", 80],
-#        ["text-decoration:underline;", 49],
-#        ["font-size:9.0pt", 25],
-#
-
-#        ["charset=\"iso-8859-1", 65],

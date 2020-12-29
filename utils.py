@@ -1,4 +1,6 @@
 import os
+SPAM_TAG = 'spam'
+HAM_TAG = 'ok'
 
 
 def read_classification_from_file(filepath):

@@ -1,4 +1,4 @@
-class CustMacros:
+class CustomMacros:
     standard_email_address = "standardEmailAddress"
     standard_pure_number = "standardPureNumber"
     standard_phone_number = "standardPhoneNumber"
