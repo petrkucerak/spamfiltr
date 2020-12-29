@@ -1,16 +1,16 @@
 {
     "compiled_data": {
         "count_per_type": {
-            "ok": 153,
-            "spam": 461
+            "OK": 153,
+            "SPAM": 461
         },
-        "word_count_per_type": {
-            "ok": 8532,
-            "spam": 27069
+        "n_of_words_per_type": {
+            "OK": 8532,
+            "SPAM": 27069
         },
         "total_mails": 614,
         "bow": {
-            "ok": {
+            "OK": {
                 "standardPureNumber": 178,
                 "list": 88,
                 "web": 78,
@@ -2260,7 +2260,7 @@
                 "fein": 1,
                 "guestblog": 1
             },
-            "spam": {
+            "SPAM": {
                 "email": 793,
                 "report": 593,
                 "standardPureNumber": 541,
@@ -5369,7 +5369,7 @@
         }
     },
     "all_data": {
-        "ok": [
+        "OK": [
             {
                 "name": "00004.864220c5b6930b209cc287c361c99af1",
                 "n_of_repeat_char_words": 0,
@@ -12256,7 +12256,7 @@
                 "word_count": 2
             }
         ],
-        "spam": [
+        "SPAM": [
             {
                 "name": "00002.9438920e9a55591b18e60d1ed37d992b",
                 "n_of_repeat_char_words": 0,

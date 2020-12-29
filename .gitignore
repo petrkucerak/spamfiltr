@@ -19,6 +19,8 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+.vscode/
+.gitignore
 
 # Installer logs
 pip-log.txt
@@ -48,3 +50,6 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+
+#other
+json_data.json

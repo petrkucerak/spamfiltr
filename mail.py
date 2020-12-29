@@ -1,23 +1,23 @@
 import re
-#from data import stopwords
 
 
 class Mail:
-    bag_of_words = {}
+    '''A structure to hold metadata of a mail in a better format'''
 
     def __init__(self, *file_name):
         self.mail_name = file_name
 
         self.header_meta = {}
+        self.bag_of_words = {}
 
-        self.body = None  # load mail body as a string
-
+        self.body = None
         self.to = None
         self.cc = None
         self.subject = None
         self.date = None
 
     def stringify(self):
+        '''returns all properties as a string in more readable format'''
         if self.body is not None:
             body = self.body[:95]+"..."
         else:
@@ -39,7 +39,7 @@ class Mail:
             date = self.date
         else:
             date = "None"
-        return f"Adresater: {to}\nCopy: {cc}\nSubject: {subject}\nDate: {date}\nBody: {body}\n"
+        return f"Addresat: {to}\nCopy: {cc}\nSubject: {subject}\nDate: {date}\nBody: {body}\n"
 
     def __repr__(self):
         return self.stringify()
@@ -54,6 +54,7 @@ class Mail:
         self.date = None
 
     def load(self, filepath):
+        '''loads mail data from file'''
         # load metadata in email header to dictionary
         # line by line
         metadata = ''
@@ -68,16 +69,11 @@ class Mail:
 
         # delete whitespaces
         metadata = re.sub('\n( +|\t+|\t+ +)', '; ', metadata)
-        # split methadat into direction
+        # split metadata into direction
         for i in metadata.strip().split('\n'):
             i = i.split(': ', 1)
             if len(i) == 2:
                 self.header_meta[i[0]] = i[1]
-
-        # TODO
-        # problem with:
-        # - Recivied
-        # - X-Spam-Status
 
         self.to = self.header_meta.get("To")
         self.cc = self.header_meta.get("Cc")
@@ -87,19 +83,6 @@ class Mail:
         # TODO: problem with loading metadata
         # - Recivied
         # - X-Spam-Status
-
-        #  TODO: is a reply?
-
-    # def remove_stop_words(self):
-    #    '''remove stopwords in mail body'''
-    #    for word in list(self.body):
-    #        word_univerzal = word.lower()
-    #        if word_univerzal in stopwords:
-    #            self.body.remove(word)
-
-    def mail_body_string_to_list(self):
-        '''string -> list of words'''
-        self.body = self.body.split()
 
 
 if __name__ == "__main__":
@@ -119,7 +102,7 @@ if __name__ == "__main__":
     # print(mail_test.body)
 
     # test print basic info of mail
-    print("Adresater:", mail_test.to, '\n\n\n')
+    print("Addressat:", mail_test.to, '\n\n\n')
     print("Copy:", mail_test.cc, '\n\n\n')
     print("Subject:", mail_test.subject, '\n\n\n')
     print("Date:", mail_test.date, '\n\n\n')

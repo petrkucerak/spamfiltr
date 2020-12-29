@@ -1,18 +1,16 @@
-from corpus import Corpus
-from utils import SPAM_TAG, HAM_TAG
-from math import log
-from macros import CustomMacros
-from premade_data_loader import LoadData
 from mail import Mail
 from text_normalizer import TextNormalizer
-from collections import Counter
-from utils import read_classification_from_file
-import known_mail
-from decimal import Decimal
 from naive_bayes import get_propabilities
 from os.path import join,  isfile
 from os import listdir
-#!important this is a really simplified version of our project in case the more complex version doesn't work (well enough)
+from macros import SPAM_TAG, HAM_TAG
+from decimal import Decimal
+
+# this skews close results towards being HAM since false positive is not as bad as false negative
+BIAS = Decimal(6.5)
+
+
+#TODO: documentation
 
 
 class MyFilter:
@@ -60,10 +58,10 @@ class MyFilter:
                     propability *= unknown_word_chance[type]
             # print(propabilities)
             chances[type] = propability
-        if chances['ok'] > chances['spam']:
-            return 'ok'
+        if chances[HAM_TAG]*BIAS > chances[SPAM_TAG]:
+            return HAM_TAG
         else:
-            return 'spam'
+            return SPAM_TAG
 
 
 if __name__ == '__main__':

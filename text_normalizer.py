@@ -6,7 +6,7 @@ import string
 from collections import Counter
 import time
 from premade_data_loader import LoadData
-from macros import CustomMacros
+from macros import *
 
 # I've used the porter_stemmer method from the nltk library
 #   (I've only copied the necessary files to run this method and am not using anything else from nltk)
@@ -48,15 +48,15 @@ class TextNormalizer:
         # replaces a email addresses with 'standardEmailAddress'
         mail_pat = re.compile(
             r"([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)")
-        self.patterns.append((mail_pat, CustomMacros.standard_email_address))
+        self.patterns.append((mail_pat, STANDARD_EMAIL_ADDRESS))
 
         # replaces something that is purely numerical (may be negative or decimal)
         just_num_pat = re.compile(r'^-?\d+(\.|,\d+)?$')
-        self.patterns.append((just_num_pat, CustomMacros.standard_pure_number))
+        self.patterns.append((just_num_pat, STANDARD_NUMBER))
 
         phone_pat = re.compile(
             r"[\dA-Z]{3}-[\dA-Z]{3}-[\dA-Z]{4}", re.IGNORECASE)
-        self.patterns.append((phone_pat, CustomMacros.standard_phone_number))
+        self.patterns.append((phone_pat, STANDARD_PHONE_NUMBER))
         # TODO: figure out where I got this (had this saved in my regex cheat sheet for years)
         url_pat = re.compile(
             r'(?:http)s?://'  # http:// or https://
@@ -66,21 +66,18 @@ class TextNormalizer:
             r'(www\.[a-zA-Z0-9]+\.)'    # or 'www.something.
             r'(?::\d+)?'  # optional port
             r'(?:/?|[/?]\S+)', re.IGNORECASE)
-        self.patterns.append((url_pat, CustomMacros.standard_url))
+        self.patterns.append((url_pat, STANDARD_URL))
 
         ip_pat = re.compile(
             r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
-        self.patterns.append((ip_pat, CustomMacros.standard_ip_address))
+        self.patterns.append((ip_pat, STANDARD_IP_ADDRESS))
 
         price_pat = re.compile(r'^\$\d+(\.|,\d+)?$')
-        self.patterns.append((price_pat, CustomMacros.standard_price_string))
-
-        # TODO: time pattern
-        # TODO: date pattern
+        self.patterns.append((price_pat, STANDARD_PRICE))
 
         repeating_sequence_pat = re.compile(r'^(.+)\1{6,}$')
         self.patterns.append(
-            (repeating_sequence_pat, CustomMacros.notable_repeating_sequence))
+            (repeating_sequence_pat, STANDARD_REPEAT_SEQUENCE))
 
     def __init__(self):
 
@@ -91,7 +88,7 @@ class TextNormalizer:
         self.repeating_sequence_pat = re.compile(r'^(.+)\1{2,}$')
 
         self.pm = LoadData()
-        self.pm.load_premade('json_premade.json')
+        self.pm.load_premade()
 
     def _normalize_words(self, words):
         '''replaces coplex structures such as mail addresses and urls with simplified strings'''
@@ -121,7 +118,7 @@ class TextNormalizer:
         clean_text = strip_tags(text)
         words = clean_text.split()
 
-        # ignores words shorter than 3 and longer than 15 characters
+        # ignores words shorter than 3
         words = [x for x in words if len(x) > 2 and len(x) < 16]
 
         words = [x for x in words if x.isalnum()]

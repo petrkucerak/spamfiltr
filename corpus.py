@@ -1,6 +1,3 @@
-import os
-
-
 class Corpus:
 
     def __init__(self, corpus_dir):
