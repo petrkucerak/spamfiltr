@@ -9,7 +9,6 @@ import json
 from utils import read_classification_from_file
 from known_mail import KnownMail
 from decimal import Decimal
-import filter
 
 
 def account_bow(key, bag_of_words):
@@ -33,7 +32,7 @@ class LearnedData:
         self.bow = {HAM_TAG: Counter(), SPAM_TAG: Counter()}
 
 
-def build_known(my_path):
+def build_known(my_path, tn):
     '''builds known.json form folder'''
 
     # get list of all files holding emails in a folder
@@ -84,6 +83,5 @@ def build_known(my_path):
 
 
 if __name__ == '__main__':
-    mf = filter.MyFilter()
     tn = TextNormalizer()
-    build_known('spam-data-12-s75-h25/1')
+    build_known('spam-data-12-s75-h25/1', tn)

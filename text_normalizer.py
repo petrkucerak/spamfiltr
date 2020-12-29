@@ -17,13 +17,11 @@ except:
     stemmer_imported = False
 
 
-class MLStripper(HTMLParser):
+class HMLStripper(HTMLParser):
     # TODO: check where I got this
     def __init__(self):
         super().__init__()
         self.reset()
-        self.strict = False
-        self.convert_charrefs = True
         self.text = StringIO()
 
     def handle_data(self, d):
@@ -34,9 +32,9 @@ class MLStripper(HTMLParser):
 
 
 def strip_tags(html):
-    s = MLStripper()
-    s.feed(html)
-    return s.get_data()
+    stripper = HMLStripper()
+    stripper.feed(html)
+    return stripper.get_data()
 
 
 class TextNormalizer:
@@ -57,15 +55,12 @@ class TextNormalizer:
         phone_pat = re.compile(
             r"[\dA-Z]{3}-[\dA-Z]{3}-[\dA-Z]{4}", re.IGNORECASE)
         self.patterns.append((phone_pat, STANDARD_PHONE_NUMBER))
-        # TODO: figure out where I got this (had this saved in my regex cheat sheet for years)
+
         url_pat = re.compile(
-            r'(?:http)s?://'  # http:// or https://
-            # domain...
-            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'
-            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})|'  # or ip
-            r'(www\.[a-zA-Z0-9]+\.)'    # or 'www.something.
-            r'(?::\d+)?'  # optional port
-            r'(?:/?|[/?]\S+)', re.IGNORECASE)
+            r'(([A-Z0-9][A-Z0-9]{0,64}\.)+([A-Z]{1,6}\.?|[A-Z0-9-]+\.?)|'
+            # or ip or 'www.something.
+            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})|(www\.[a-zA-Z0-9]+\.)'
+            r'(/?|[/?]\S+)', re.IGNORECASE)
         self.patterns.append((url_pat, STANDARD_URL))
 
         ip_pat = re.compile(
@@ -102,7 +97,7 @@ class TextNormalizer:
         for word in words:
             found = False
             for pattern in self.patterns:
-                if pattern[0].match(word):
+                if pattern[0].search(word):
                     pattern_counter[pattern[1]] += 1
                     found = True
                     break
@@ -118,17 +113,19 @@ class TextNormalizer:
         clean_text = strip_tags(text)
         words = clean_text.split()
 
-        # ignores words shorter than 3
-        words = [x for x in words if len(x) > 2 and len(x) < 16]
-
-        words = [x for x in words if x.isalnum()]
-
-        # removes stopwords (words that won't help us with evaluating if the mail is spam
-        #   like pronouns, sentence connectors and such)
-        words = [x for x in words if x not in self.pm.stopwords]
-
+        # ignores words shorter than 3 and longer than 50 characters
         counters = self._normalize_words(words)
-        word_counter = counters[0]
+
+        # removes:
+        # 1) words shorter than 3 and longer than 17 characters
+        #    17 was chosen because it's the length of the longest word
+        #    in the list of most common english words (telecommunications)
+        # 2) words that are not alphanumeric
+        # 3) stopwords (words that won't help us with evaluating if the mail is spam
+        #    like pronouns, sentence connectors and such)
+        word_counter = Counter({key: value for (key, value) in dict(counters[0]).items() if len(
+            key) > 2 and len(key) <= 17 and key.isalnum() and key not in self.pm.stopwords})
+
         final_counter = counters[1]
         final_counter += stem_list_of_words.stem_words(word_counter)
 

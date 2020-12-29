@@ -5,7 +5,7 @@ from os.path import join,  isfile
 from os import listdir
 from macros import SPAM_TAG, HAM_TAG
 from decimal import Decimal
-
+from data_trainer import build_known
 # this skews close results towards being HAM since false positive is not as bad as false negative
 BIAS = Decimal(6.5)
 
@@ -14,14 +14,16 @@ BIAS = Decimal(6.5)
 
 
 class MyFilter:
+    trained = False
+
+    def __init__(self):
+        self.tn = TextNormalizer()
+
     def train(self, train_dir):
-        # Sadly don't have the time to implement this,
-        # and it's not necessary as I've already prepared some data from the provided dataset
-        pass
+        build_known(train_dir, self.tn)
+        self.trained = True
 
     def test(self, test_dir):
-
-        tn = TextNormalizer()
 
         probabilities = get_propabilities()
         onlyfiles = [f for f in listdir(test_dir) if isfile(
@@ -30,15 +32,15 @@ class MyFilter:
         for file in onlyfiles:
             mail = Mail(join(test_dir, file))
             mail.load(join(test_dir, file))
-            my_prediction = self.classify(mail.body, tn, probabilities)
+            my_prediction = self.classify(mail.body,  probabilities)
             lines.append(f'{file} {my_prediction.upper()}')
         with open(join(test_dir, "!prediction.txt"), 'w', encoding='utf-8') as f:
             f.write('\n'.join(lines))
 
-    def classify(self, body, tn, probabilities):
+    def classify(self, body,  probabilities):
         type_chance, word_chance, unknown_word_chance = probabilities
 
-        bag_of_words = tn.normalize(body)
+        bag_of_words = self.tn.normalize(body)
         chances = {}
         for type in type_chance:
             propability = type_chance[type]
@@ -66,8 +68,10 @@ class MyFilter:
 
 if __name__ == '__main__':
     import time
-    start = time.time()
     filter = MyFilter()
 
+    filter.train('spam-data-12-s75-h25/1')
+    start = time.time()
+
     filter.test('spam-data-12-s75-h25/1')
-    print(time.time() - start)
+    print(f'filter.test took {round(time.time() - start, 3)}s')

@@ -1,4 +1,5 @@
 import re
+import base64
 
 
 class Mail:
@@ -79,6 +80,10 @@ class Mail:
         self.cc = self.header_meta.get("Cc")
         self.subject = self.header_meta.get("Subject")
         self.date = self.header_meta.get("Date")
+        self.encoding = self.header_meta.get(
+            "Content-Transfer-Encoding")
+        if self.encoding is not None:
+            self.encoding = self.encoding.lower()
 
         # TODO: problem with loading metadata
         # - Recivied
