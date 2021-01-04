@@ -1,0 +1,83 @@
+\documentclass[12pt]{article}
+
+\usepackage[czech]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\usepackage{a4wide}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{amsthm}
+%definice matematických prostředí
+\newtheorem{veta}{Věta}
+\newtheorem{lema}[veta]{Lemma}
+
+\usepackage{graphicx}
+\usepackage{pgf,tikz} 
+\usetikzlibrary{arrows}
+
+%sazba odkazů na web
+\usepackage{url}
+
+\title{Tvorba spam filtru}
+
+\author{Filip Krul, Petr Kučera}
+
+\date{4.\,1.\,2021}
+
+\begin{document}
+
+\section{Úvod}\label{kapitola}
+
+Cílem našeho projektu bylo vytvořit spam filtr, který dokáže rozeznat podvodné emaily od emailů, které jsou pro uživatele relevantní.
+
+\section{Popis principu algoritmu}
+
+Naším cílem bylo vytvořit spam filtr, který by fungoval na dvou rovinách. První rovina statická měla obsahovat algoritmus, který bude klasifikovat emaily na základě dat, která ve většině případů obsahují podvodné emaily. Druhá dynamická část by obsahovala algoritmus, který se dokáže sám učit na základě dat určených k učení. Závěrečná klasifikace, zda je email spam či ne, by byl následně vyhodnocen na základě skóre.
+
+\subsection{Načítání dat}
+
+Pro lepší práci s daty jsme si vytvořili modul mail, který pomáhá načíst jednotlivé částí mailu, jako je například odesílatel, předmět mailu či samotná emailová zpráva. Email jsme očistili o slova, která nemají žádnou vypovídající hodnotu jako jsou například spojky nebo předložky, unifikovali velikost písmen, odstranili html tagy a složité textové struktury nahradili jednoduššími.
+
+\subsection{Statická část}
+
+Základní filtrování emailů jsme zajistili pomocí již předpřipravených kritérií, která jsme získali z ukázkových dat. Patřilo do nich například filtrace mailů, které nadměrně užívají určité znaky či obsahují slova, která jsou pro spamové maily typická.
+
+\subsection{Dynamická část}
+
+Dynamickou část filtru nám tvoří algoritmus, který se umí sám učit. Aby mohlo učení probíhat efektivně, použili jsme metodu \texttt{porter\_stemmer} z knihovny \texttt{nltk}, která skloňovaná slova konvertuje do základního tvaru. Například z \texttt{['love', 'loving', 'lovely']} se stane \texttt{['love', 'love', 'love']}.
+
+\subsection{Vyhodnocení statusu mailu}
+
+Z dat nasbíraných během statické i dynamické části se na závěr vyhodnotilo skóre, které rozhodlo, zda bude filtr klasifikovat email jako spam či ham.
+
+\section{Popis týmové práce}
+
+\subsection{Plánování}
+
+Na začátku celého projektu jsme si zavolali. Sdělili si své zkušenosti a rozvrhli, jak budeme postupovat. Vyjasnili jsme si, kdo se pustí, do jakého dílu práce.
+
+\subsection{Využívané technologie}
+
+Pro organizaci práce jsme vytvořili Trello, kód jsme sdíleli přes GitHub a komunikovali na Discordu.
+
+\subsection{Rozdělené práce}
+
+Na projektu jsme pracovali dohromady. Filip se spíše více soustředil na psaní kódu, Petr zase vypracoval závěrečný report a prezentaci.
+
+\begin{center}
+\begin{tabular}{l|r}
+osoba & typ činnosti\\\hline
+Filip Krul & primárně kód, sekundárně report a prezentace \\
+Petr Kučera & primárně report a prezentace, sekundárně kód
+\end{tabular}
+\end{center}
+
+\section{Závěr}
+
+Filtr se nám povedlo dopracovat do stádia, kdy je schopen celkem pokročilé analýzy emailů. Nemůže se ovšem rovnat s algoritmy od softwarových gigantů. Projekt nám umožnil si vyzkoušet postavit algoritmus, který se umí učit za běhu programu. Vyzkoušeli jsme nové metody, které skrývá Python. Zdokonalili jsme se v týmové spolupráci a komunikačních dovednostech.
+
+\end{document}
