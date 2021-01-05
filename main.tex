@@ -22,13 +22,22 @@
 %sazba odkazů na web
 \usepackage{url}
 
-\title{Tvorba spam filtru}
+\begin{titlepage}
+
+\title{
+    Tvorba spam filtru \\
+    \large Report k závěrečnému projektu z předmětu RPH \\
+    }
 
 \author{Filip Krul, Petr Kučera}
 
 \date{4.\,1.\,2021}
 
+\end{titlepage}
+
 \begin{document}
+
+\maketitle
 
 \section{Úvod}\label{kapitola}
 
@@ -40,7 +49,7 @@ Naším cílem bylo vytvořit spam filtr, který by fungoval na dvou rovinách. 
 
 \subsection{Načítání dat}
 
-Pro lepší práci s daty jsme si vytvořili modul mail, který pomáhá načíst jednotlivé částí mailu, jako je například odesílatel, předmět mailu či samotná emailová zpráva. Email jsme očistili o slova, která nemají žádnou vypovídající hodnotu jako jsou například spojky nebo předložky, unifikovali velikost písmen, odstranili html tagy a složité textové struktury nahradili jednoduššími.
+Pro lepší práci s daty jsme si vytvořili modul mail, který pomáhá načíst jednotlivé částí mailu, jako je například odesílatel, předmět mailu či samotná emailová zpráva. Email jsme očistili o slova, která nemají žádnou vypovídající hodnotu jako jsou například spojky nebo předložky, unifikovali velikost písmen, odstranili html tagy a složité textové struktury, které mohou znít jinak ale mají stejný význam, nahradili normalizovanými stringy.
 
 \subsection{Statická část}
 
@@ -48,7 +57,7 @@ Základní filtrování emailů jsme zajistili pomocí již předpřipravených 
 
 \subsection{Dynamická část}
 
-Dynamickou část filtru nám tvoří algoritmus, který se umí sám učit. Aby mohlo učení probíhat efektivně, použili jsme metodu \texttt{porter\_stemmer} z knihovny \texttt{nltk}, která skloňovaná slova konvertuje do základního tvaru. Například z \texttt{['love', 'loving', 'lovely']} se stane \texttt{['love', 'love', 'love']}.
+Dynamickou část filtru nám tvoří algoritmus, který se umí sám učit. Při učení využíváme \textbf{Naive Bayes klasifikátor}, který vyhodonocuje data na základě pravděpodobnosti. Aby mohlo učení probíhat efektivně, použili jsme metodu \emph{porter\_stemmer} z knihovny \emph{nltk},\footnote{Použití metody z této knihovny konzultováno a povoleno na cvičení.} která skloňovaná slova konvertuje do základního tvaru. Například z \texttt{['love', 'loving', 'lovely']} se stane \texttt{['love', 'love', 'love']}.
 
 \subsection{Vyhodnocení statusu mailu}
 
