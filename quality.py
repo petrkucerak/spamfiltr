@@ -1,19 +1,17 @@
 import confmat
 from utils import read_classification_from_file
+from macros import SPAM_TAG, HAM_TAG
 import os
 
 
-SPAM_TAG = 'SPAM'
-HAM_TAG = 'OK'
-
-
 def quality_score(tp, tn, fp, fn):
+    '''calculates quality score base on predefined formula'''
     quality = (tp+tn)/(tp+tn+10*fn+fp)
     return quality
 
 
 def compute_quality_for_corpus(corpus_dir):
-
+    '''returns quality for !preditions.txt and !truth.txt in a folder'''
     bcm = confmat.BinaryConfusionMatrix(HAM_TAG, SPAM_TAG)
     truth = read_classification_from_file(corpus_dir+'/!truth.txt')
     prediction = read_classification_from_file(corpus_dir+'/!prediction.txt')
@@ -24,11 +22,4 @@ def compute_quality_for_corpus(corpus_dir):
 
 
 if __name__ == '__main__':
-    res = {'tp': 0, 'tn': 10, 'fp': 0, 'fn': 20}
-    tn = 'tn'
-    tp = 'tp'
-    fp = 'fp'
-    fn = 'fn'
-    print(f'({res[tp]}+{res[tn]})/({res[tp]}+{res[tn]}+10*{res[fp]}+{res[fn]})')
-
-    print('Quality: ', quality_score(**res))
+    print('Quality: ', compute_quality_for_corpus('spam-data-12-s75-h25/1'))

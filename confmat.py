@@ -17,6 +17,7 @@ class BinaryConfusionMatrix():
     def check_value_of(self, value):
         """Raise ValueError if var does not contain either positive or negative tag."""
         if value not in (self.pos_tag, self.neg_tag):
+            print(value, self.pos_tag, self.neg_tag)
             raise ValueError('The arguments may be either %s or %s.'
                              % (self.pos_tag, self.neg_tag))
 
